@@ -18,19 +18,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 프로
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")  # public 폴더 경로
 
 app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
 CORS(app)
 
 
 # 🔹 Google OAuth 설정
-GOOGLE_CLIENT_ID = "888167258223-s9r7egdalka0tvvettboc75qfcm21r5d.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
-GOOGLE_REDIRECT_URI = "http://localhost:5000/auth/callback"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
-GOOGLE_PLACES_API_KEY = "AIzaSyCcqraspdA5PdAI6mZQTElHBEkDRK0KY5A"
-AZURE_OPENAI_API_KEY="AmO7fs6GbfsDFwi2KFcTTZILxclkljZxsEhprX03xHb7TfMlxfMaJQQJ99BCACYeBjFXJ3w3AAABACOG6JA0"
-AZURE_OPENAI_ENDPOINT = "https://azure-services-openai.openai.azure.com/"
+# 🔹 API 키 설정
+GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+
+# 🔹 OpenAI API 키 설정
+openai.api_key = AZURE_OPENAI_API_KEY
 
 
 # 🔹 기본 페이지 제공 (index.html)
@@ -111,8 +113,6 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
 
 
 # 감정 분석 모델 로드 (Hugging Face 모델 사용)

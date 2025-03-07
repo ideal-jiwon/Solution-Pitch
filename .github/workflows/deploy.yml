@@ -38,24 +38,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python version
-        uses: actions/setup-python@v3.0.0
+      - name: Cache pip
+        uses: actions/cache@v2
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: '**/requirements.txt'
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-
-      - name: Install dependencies (without caching)
-        run: |
-          pip install Flask requests transformers --no-cache-dir
-
-      - name: "Debugging: Check file sizes before deployment"
-        run: du -sh * | sort -hr | head -20  # ✅ 파일 크기 확인 추가
 
   deploy:
     permissions:
@@ -78,8 +82,3 @@ jobs:
       - name: 'Restart Azure Web App'
         run: |
           az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ai-servcies-rg
-      
-      - name: Set output
-        run: |
-            length=$(python calculate_length.py)
-            echo "length=${length}" >> $GITHUB_ENV
