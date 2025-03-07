@@ -1,6 +1,7 @@
-flask
-gunicorn
-requests
+Flask
+Flask-Cors
 transformers
 openai
+requests
 python-dotenv
+gunicorn
