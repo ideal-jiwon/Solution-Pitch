@@ -44,6 +44,12 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: '**/requirements.txt'
+      
+      - name: Install dependencies (except torch)
+        run: |
+            pip install Flask requests transformers --no-cache-dir
+            pip install torch --no-cache-dir
+  
   
       - name: Create and start virtual environment
         run: |
