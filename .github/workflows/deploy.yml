@@ -92,6 +92,7 @@ jobs:
             app-name: "koala94"
             resource-group-name: "Koala94"
             slot-name: "production"
+            package: backend
         
 
       
