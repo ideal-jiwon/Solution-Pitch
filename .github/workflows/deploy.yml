@@ -81,12 +81,15 @@ jobs:
       - name: Check workspace files
         run: ls -R
 
+      - name: Zip the application files
+        run: zip -r app.zip .
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
             app-name: "koala94"
             resource-group-name: "Koala94"
-            package: "."
+            package: "app.zip"
         
 
       
