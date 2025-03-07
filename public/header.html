@@ -6,10 +6,15 @@
         <img src="img/icon-3.png" alt="logo" class="logo"/>
         <h1>Solution Pitch</h1>
         <nav class ="nav-bar">
-            <a href="login.html">Login</a>
+            <span id="nav-login-container">
+                <a href="login.html" id="login-link">Login</a>
+                <button id="logout-button" style="display: none;" onclick="logout()">Logout</button>
+            </span>
             <a href="pricing.html">Pricing</a>
             <a href="faq">FAQ</a>
             <a href="reviews.html">Reviews</a>
         </nav>
     </div>                
 </header> 
+
+<script src="js/auth.js"></script>

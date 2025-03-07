@@ -3,6 +3,12 @@ let marker;
 let autocomplete;
 
 async function initMap() {
+    console.log("Google Maps API:", google.maps);
+    if (!google.maps || !google.maps.places) {
+    console.error("Google Places API가 로드되지 않았습니다.");
+        } else {
+    console.log("Google Places API 로드 완료!");
+}
     // 📌 1️⃣ 사용자의 현재 위치 가져오기
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
@@ -35,6 +41,7 @@ async function initMap() {
             autocomplete = new google.maps.places.Autocomplete(
                 document.getElementById("autocomplete"),
                 { types: ["geocode"] }
+                
             );
 
             // 📌 5️⃣ 주소 선택 시 이벤트 추가
@@ -87,6 +94,7 @@ function loadDefaultLocation() {
     autocomplete = new google.maps.places.Autocomplete(
         document.getElementById("autocomplete"),
         { types: ["geocode"] }
+        
     );
 
     autocomplete.addListener("place_changed", async () => {
@@ -119,4 +127,41 @@ function searchLocation(){
     }
     }
 
+    function updateAnalysisUI(data) {
+        document.getElementById("analysis-result").textContent = data.relationship_analysis;
+    
+        // Update ratings
+        document.getElementById("service-rating").textContent = data.avg_scores.service;
+        document.getElementById("price-rating").textContent = data.avg_scores.price;
+        document.getElementById("menu-rating").textContent = data.avg_scores.menu;
+        document.getElementById("location-rating").textContent = data.avg_scores.location;
+        document.getElementById("ambiance-rating").textContent = data.avg_scores.ambiance;
+    
+        // Update Strengths & Weaknesses
+        let strengthsHTML = "<h4>Strengths</h4>";
+        for (const [key, value] of Object.entries(data.analysis.strengths)) {
+            strengthsHTML += `<p>${key}: ${value}%</p>`;
+        }
+        document.getElementById("strengths").innerHTML = strengthsHTML;
+    
+        let weaknessesHTML = "<h4>Weaknesses</h4>";
+        for (const [key, value] of Object.entries(data.analysis.weaknesses)) {
+            weaknessesHTML += `<p>${key}: ${value}%</p>`;
+        }
+        document.getElementById("weaknesses").innerHTML = weaknessesHTML;
+    
+        // Update Rank
+        document.getElementById("restaurant-rank").textContent = `Rank: ${data.ranking.rank_category}`;
+    }
+    function loadGoogleMaps() {
+        const script = document.createElement("script");
+        script.defer = true;
+        script.async = true;
+        document.head.appendChild(script);
+    }
+    
+    loadGoogleMaps();
 
+    
+    
+    
