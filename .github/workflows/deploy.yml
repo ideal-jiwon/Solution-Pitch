@@ -55,7 +55,7 @@ jobs:
 
       - name: Deploy files directly to Azure
         run: |
-          rsync -av --exclude='venv' --exclude='node_modules' --exclude='__pycache__' --exclude='.git' --exclude='.github' ./ azureuser@${{ secrets.AZURE_SERVER_IP }}:/home/site/wwwroot/
+          scp -r ./server.py ./requirements.txt ./app/ azureuser@${{ secrets.AZURE_SERVER_IP }}:/home/site/wwwroot/
 
             
   deploy:
