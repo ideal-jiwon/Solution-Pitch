@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from app.routes import setup_routes
+from app.auth import setup_auth
 
 # 환경 변수 로드
 load_dotenv()
@@ -13,5 +14,6 @@ def create_app():
 
     # 라우트 등록
     setup_routes(app)
+    setup_auth(app)
 
     return app

@@ -1,39 +1,28 @@
-from flask import request, jsonify, send_from_directory, session
-import requests
-import openai
+from flask import request, jsonify, send_from_directory
+from app.nlp import fetch_reviews, analyze_review_relationships
 import os
-from app.nlp_models import analyze_sentiment
+
+PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../public")
 
 def setup_routes(app):
-    """Flask 라우트를 설정하는 함수"""
+    """Flask 라우트 설정"""
 
-    # 🔹 정적 파일 제공 (HTML, CSS, JS)
     @app.route("/")
     def serve_index():
-        return send_from_directory("public", "index.html")
+        return send_from_directory(PUBLIC_DIR, "index.html")
 
     @app.route("/<path:path>")
     def serve_static_files(path):
-        return send_from_directory("public", path)
+        return send_from_directory(PUBLIC_DIR, path)
 
-    # 🔹 Google 로그인 URL 생성
-    @app.route("/auth/login")
-    def login():
-        google_auth_url = (
-            "https://accounts.google.com/o/oauth2/auth"
-            "?response_type=code"
-            f"&client_id={os.getenv('GOOGLE_CLIENT_ID')}"
-            "&redirect_uri=" + os.getenv("GOOGLE_REDIRECT_URI") +
-            "&scope=openid%20email%20profile"
-        )
-        return jsonify({"auth_url": google_auth_url})
+    @app.route("/analyze_reviews", methods=["GET"])
+    def analyze_reviews():
+        place_id = request.args.get("place_id")
+        if not place_id:
+            return jsonify({"error": "Missing place_id"}), 400
 
-    # 🔹 감정 분석 API
-    @app.route("/analyze_sentiment", methods=["POST"])
-    def sentiment_analysis():
-        data = request.json
-        if "text" not in data:
-            return jsonify({"error": "Missing 'text' field"}), 400
+        result = fetch_reviews(place_id)
+        result["relationship_analysis"] = analyze_review_relationships(result["reviews"])
+        
+        return jsonify(result)
 
-        sentiment, confidence = analyze_sentiment(data["text"])
-        return jsonify({"sentiment": sentiment, "confidence": confidence})
