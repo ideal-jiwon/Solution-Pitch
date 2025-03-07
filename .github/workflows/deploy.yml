@@ -43,10 +43,8 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: |
-            **/requirements.txt
-            !**/large_directory/**
-
+          cache-dependency-path: '**/requirements.txt'
+  
       - name: Create and start virtual environment
         run: |
           python -m venv venv
@@ -62,12 +60,11 @@ jobs:
         with:
           name: python-app
           path: |
-            .
-            !venv/
-            !node_modules/
-            !.git/
-            !.github/
-            !large_directory/
+            ./server.py
+            ./requirements.txt
+            ./app/
+          retention-days: 1
+            
 
   deploy:
     permissions:
@@ -96,9 +93,6 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-
-      - name: Set Web App URL
-        run: echo "WEBAPP_URL=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
 
       - name: Set Web App URL
         run: echo "WEBAPP_URL=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
