@@ -20,8 +20,8 @@
 name: Build and deploy Python app to Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: koala94  # set this to the name of your Azure Web App
-  PYTHON_VERSION: '3.9'              # set this to the Python version to use
+  AZURE_WEBAPP_NAME: koala94
+  PYTHON_VERSION: '3.9'
 
 on:
   push:
@@ -43,6 +43,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
+          cache-dependency-path: |
+            **/requirements.txt
+            !**/large_directory/**
 
       - name: Create and start virtual environment
         run: |
@@ -64,6 +67,7 @@ jobs:
             !node_modules/
             !.git/
             !.github/
+            !large_directory/
 
   deploy:
     permissions:
@@ -92,6 +96,9 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+      - name: Set Web App URL
+        run: echo "WEBAPP_URL=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
 
       - name: Set Web App URL
         run: echo "WEBAPP_URL=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
