@@ -17,7 +17,7 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 프로젝트 루트 경로
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")  # public 폴더 경로
 
-app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
+app = Flask(__name__)
 CORS(app)
 
 
@@ -46,9 +46,9 @@ def serve_static_files(path):
     return send_from_directory(PUBLIC_DIR, path)
 
 if __name__ == "__main__":
-    print(f"🚀 Flask 서버 실행 중: http://127.0.0.1:5000/")
-    print(f"📂 Static files served from: {PUBLIC_DIR}")
-    app.run(debug=True, port=5000)
+    import os
+    port = int(os.environ.get("PORT", 8000))  # Azure는 환경변수로 PORT를 설정할 수도 있음
+    app.run(host="0.0.0.0", port=port)
 
 
 # 🔹 Google 로그인 URL 생성
