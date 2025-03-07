@@ -82,7 +82,7 @@ jobs:
           app-name: "koala94"
           resource-group-name: "Koala94"
           slot-name: "production"
-          package: "./restaurant-ai-backend/restaurant-ai-frontend-typescript"
+          package: "./restaurant-ai-backend/restaurant-ai-frontend-typescript/backend"
       
       - name: 'Restart Azure Web App'
         run: |
