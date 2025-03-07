@@ -79,8 +79,8 @@ jobs:
       - name: Deploy files directly to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "Koala94"
-          resource-group-name: "ai-servcies-rg"
+          app-name: "koala94"
+          resource-group-name: "Koala94"
           slot-name: "production"
           package: "./restaurant-ai-backend"
       
