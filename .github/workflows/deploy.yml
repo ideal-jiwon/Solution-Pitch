@@ -44,24 +44,19 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: '**/requirements.txt'
-      
-      - name: Install dependencies (except torch)
-        run: |
-            pip install Flask requests transformers --no-cache-dir
-  
+
       - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
 
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
-
-      - name: Deploy files directly to Azure
+      - name: Install dependencies (without caching)
         run: |
-          scp -r ./server.py ./requirements.txt ./app/ azureuser@${{ secrets.AZURE_SERVER_IP }}:/home/site/wwwroot/
+          pip install Flask requests transformers --no-cache-dir
 
-            
+      - name: "Debugging: Check file sizes before deployment"
+        run: du -sh * | sort -hr | head -20  # ✅ 파일 크기 확인 추가
+
   deploy:
     permissions:
       contents: none
@@ -76,15 +71,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: python-app
-          path: .
+      - name: Deploy files directly to Azure
+        run: |
+          scp -r ./server.py ./requirements.txt ./app/ azureuser@${{ secrets.AZURE_SERVER_IP }}:/home/site/wwwroot/
 
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      - name: 'Restart Azure Web App'
+        run: |
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ai-servcies-rg
