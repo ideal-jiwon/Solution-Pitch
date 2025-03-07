@@ -78,3 +78,8 @@ jobs:
       - name: 'Restart Azure Web App'
         run: |
           az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ai-servcies-rg
+      
+      - name: Set output
+        run: |
+            length=$(python calculate_length.py)
+            echo "length=${length}" >> $GITHUB_ENV
