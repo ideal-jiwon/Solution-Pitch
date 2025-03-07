@@ -91,8 +91,7 @@ jobs:
         with:
             app-name: "koala94"
             resource-group-name: "Koala94"
-            slot-name: "production"
-            package: ./backend
+            package: "${{ github.workspace }}/backend"
         
 
       
