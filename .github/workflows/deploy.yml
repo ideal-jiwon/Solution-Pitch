@@ -22,7 +22,7 @@ name: Build and deploy Python app to Azure Web App
 
 env:
   AZURE_WEBAPP_NAME: koala94
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.11'
   STARTUP_COMMAND: "bash startup.sh"
 
 
