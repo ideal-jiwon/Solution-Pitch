@@ -53,15 +53,10 @@ jobs:
 
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
-      - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: |
-            ./server.py
-            ./requirements.txt
-            ./app/
-          retention-days: 1
+      - name: Deploy files directly to Azure
+        run: |
+          rsync -av --exclude='venv' --exclude='node_modules' --exclude='__pycache__' --exclude='.git' --exclude='.github' ./ azureuser@${{ secrets.AZURE_SERVER_IP }}:/home/site/wwwroot/
+
             
   deploy:
     permissions:
