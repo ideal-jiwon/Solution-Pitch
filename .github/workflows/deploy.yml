@@ -85,7 +85,7 @@ jobs:
         with:
             app-name: "koala94"
             resource-group-name: "Koala94"
-            package: "./backend"
+            package: "."
         
 
       

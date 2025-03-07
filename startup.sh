@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Move into the backend directory
-cd backend
-
-# Install dependencies (if not installed)
+# 패키지 설치
 pip install -r requirements.txt
 
-# Run Flask app using Gunicorn
-gunicorn -w 4 -b 0.0.0.0:8000 server:app
+# Gunicorn 실행 (Flask 서버)
+exec gunicorn -w 4 -b 0.0.0.0:8000 server:app
+
