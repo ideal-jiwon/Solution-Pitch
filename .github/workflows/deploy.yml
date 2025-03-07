@@ -23,7 +23,8 @@ name: Build and deploy Python app to Azure Web App
 env:
   AZURE_WEBAPP_NAME: koala94
   PYTHON_VERSION: '3.9'
-  STARTUP_COMMAND: "bash restaurant-ai-frontend-typescript/backend/startup.sh"
+  STARTUP_COMMAND: "bash backend/startup.sh"
+
 
 on:
   push:
@@ -55,9 +56,11 @@ jobs:
       
       - name: Install dependencies
         run: |
-          cd restaurant-ai-frontend-typescript/backend
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+      
+      - name: Make startup script executable
+        run: chmod +x backend/startup.sh
         
 
       - name: Create and start virtual environment
@@ -85,7 +88,7 @@ jobs:
           app-name: "koala94"
           resource-group-name: "Koala94"
           slot-name: "production"
-          package: "./restaurant-ai-frontend-typescript/backend"
+          package: "./backend"
       
       - name: 'Restart Azure Web App'
         run: |
