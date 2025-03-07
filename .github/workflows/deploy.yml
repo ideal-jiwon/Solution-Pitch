@@ -19,6 +19,7 @@
 
 name: Build and deploy Python app to Azure Web App
 
+
 env:
   AZURE_WEBAPP_NAME: koala94
   PYTHON_VERSION: '3.9'
@@ -75,10 +76,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy files directly to Azure
-        run: |
-          scp -r ./server.py ./requirements.txt ./app/ azureuser@${{ secrets.AZURE_SERVER_IP }}:/home/site/wwwroot/
-
+      - name: Deploy files directly to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+           app-name: ${{ env.AZURE_WEBAPP_NAME }}
+           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+           package: .   
+      
       - name: 'Restart Azure Web App'
         run: |
           az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ai-servcies-rg
