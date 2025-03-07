@@ -23,7 +23,6 @@ name: Build and deploy Python app to Azure Web App
 env:
   AZURE_WEBAPP_NAME: koala94
   PYTHON_VERSION: '3.9'
-  STARTUP_COMMAND: "bash backend/startup.sh"
 
 
 on:
@@ -39,8 +38,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -59,11 +57,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-      
-      - name: Make startup script executable
-        run: chmod +x backend/startup.sh
         
-
       - name: Create and start virtual environment
         run: |
           python -m venv venv
@@ -91,7 +85,7 @@ jobs:
         with:
             app-name: "koala94"
             resource-group-name: "Koala94"
-            package: "${{ github.workspace }}/backend"
+            package: "./backend"
         
 
       
