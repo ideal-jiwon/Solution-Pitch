@@ -72,10 +72,10 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      - name: Azure Login  # ✅ 추가할 부분
+      - name: Azure Login 
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}  # ✅ GitHub Secrets에서 불러오기
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
