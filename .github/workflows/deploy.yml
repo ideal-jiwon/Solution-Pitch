@@ -82,7 +82,7 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
+
       - name: Check workspace files
         run: ls -R
 
@@ -92,7 +92,6 @@ jobs:
             app-name: "koala94"
             resource-group-name: "Koala94"
             slot-name: "production"
-            package: "${{ github.workspace }}/backend"
         
 
       
