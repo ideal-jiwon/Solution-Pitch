@@ -20,8 +20,8 @@
 name: Build and deploy Python app to Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: koala94  # set this to the name of your Azure Web App
-  PYTHON_VERSION: '3.9'              # set this to the Python version to use
+  AZURE_WEBAPP_NAME: koala94
+  PYTHON_VERSION: '3.9'
 
 on:
   push:
@@ -43,14 +43,13 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-
+          cache-dependency-path: '**/requirements.txt'
+  
       - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+          pip install -r requirements.txt
 
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -59,9 +58,11 @@ jobs:
         with:
           name: python-app
           path: |
-            .
-            !venv/
-
+            ./server.py
+            ./requirements.txt
+            ./app/
+          retention-days: 1
+            
   deploy:
     permissions:
       contents: none
@@ -69,9 +70,13 @@ jobs:
     needs: build
     environment:
       name: 'Development'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+      - name: Azure Login 
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
