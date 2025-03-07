@@ -92,10 +92,10 @@ jobs:
             app-name: "koala94"
             resource-group-name: "Koala94"
             slot-name: "production"
-            package: backend
+            package: ./backend
         
 
       
       - name: 'Restart Azure Web App'
         run: |
-          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ai-servcies-rg
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group Koala94
