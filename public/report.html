@@ -7,8 +7,8 @@
     <title>HOME</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="css/styles.css"/>
-    <script defer src="js/map.js"></script>
     <script defer src="js/chatbot.js"></script>
+    <script defer src="js/map.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcqraspdA5PdAI6mZQTElHBEkDRK0KY5A&libraries=places&callback=initMap"></script>
 </head>
 <body>
@@ -19,8 +19,8 @@
             <fieldset class="report-search">
                 <legend></legend>
                 <label for="business-address">Business Address  </label>
-                <input id="autocomplete" type="text" placeholder="Enter your address">
-                <button class="report-button" onclick="searchLocation()">SEARCH</button>
+                <input type="text" id="autocomplete" placeholder="Enter a location">
+                <button onclick="searchLocation()">Search</button>
             <div class = "googlesummary">  
                 <div id="map"></div>            
                 <h2 id="business-name"></h2> 
