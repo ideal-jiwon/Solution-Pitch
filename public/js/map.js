@@ -146,8 +146,6 @@ async function searchLocation() {
         console.error("Error fetching places:", error);
     }
 }
-
-
 async function fetchAnalysis(placeId) {
     if (!placeId) {
         console.error("❌ Invalid place_id:", placeId);
@@ -155,60 +153,26 @@ async function fetchAnalysis(placeId) {
         return;
     }
 
-    // 🔹 요청 URL을 확인하기 위한 로그 추가
-    const requestUrl = `/models/analyze_reviews?place_id=${placeId}`;
-    console.log(`✅ Sending request to: ${requestUrl}`);
+    console.log("Requesting analysis for place_id:", placeId);
 
     try {
-        const response = await fetch(requestUrl);
-        console.log("🔹 Fetch response status:", response.status);
-
-        if (!response.ok) {
-            console.error(`❌ Error fetching analysis. HTTP Status: ${response.status}`);
-            console.error("🔹 Response text:", await response.text());  // 에러 원인 확인
-            return;
-        }
-
+        const response = await fetch(`/analyze_reviews?place_id=${placeId}`);
         const data = await response.json();
-        console.log("🔹 Fetch response data:", data);
-
-        updateAnalysisUI(data);
 
         if (data.error) {
-            console.error("❌ Error fetching analysis:", data.error);
+            console.error("❌ Error fetching reviews:", data.error);
+            document.getElementById("analysis-result").textContent = "Error fetching reviews.";
             return;
         }
+
+        // 📌 Raw JSON 데이터를 UI에 표시
+        document.getElementById("analysis-result").innerHTML = `<pre>${JSON.stringify(data.reviews, null, 2)}</pre>`;
 
     } catch (error) {
         console.error("❌ Network error:", error);
+        document.getElementById("analysis-result").textContent = `Network Error: ${error.message}`;
     }
-}
-        
-// 📌 8️⃣ 리뷰 분석 결과 UI 업데이트
-function updateAnalysisUI(data) {
-    document.getElementById("analysis-result").textContent = data.relationship_analysis;
-
-    document.getElementById("service-rating").textContent = data.avg_scores.service || "-";
-    document.getElementById("price-rating").textContent = data.avg_scores.price || "-";
-    document.getElementById("menu-rating").textContent = data.avg_scores.menu || "-";
-    document.getElementById("location-rating").textContent = data.avg_scores.location || "-";
-    document.getElementById("ambiance-rating").textContent = data.avg_scores.ambiance || "-";
-
-    let strengthsHTML = "<h4>Strengths</h4>";
-    for (const [key, value] of Object.entries(data.analysis?.strengths || {})) {
-        strengthsHTML += `<p>${key}: ${value}%</p>`;
-    }
-    document.getElementById("strengths").innerHTML = strengthsHTML;
-
-    let weaknessesHTML = "<h4>Weaknesses</h4>";
-    for (const [key, value] of Object.entries(data.analysis?.weaknesses || {})) {
-        weaknessesHTML += `<p>${key}: ${value}%</p>`;
-    }
-    document.getElementById("weaknesses").innerHTML = weaknessesHTML;
-
-    document.getElementById("restaurant-rank").textContent = `Rank: ${data.ranking?.rank_category || "N/A"}`;
 }
 
 // 📌 9️⃣ Google Maps API 로드
 loadGoogleMaps();
-

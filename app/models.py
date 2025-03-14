@@ -1,35 +1,60 @@
 from flask import Blueprint, request, jsonify
-import logging
-from app.services.nlp_service import analyze_sentiment, extract_key_phrases, summarize_text
-from app.services.db_service import insert_review_analysis, fetch_unprocessed_reviews
+import psycopg2
+import os
+from app.services.scraper import scrape_reviews
+from app.services.db import connect_db
 
 models_bp = Blueprint("models", __name__)
 
+# PostgreSQL 연결 설정
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
+
+def connect_db():
+    """PostgreSQL 연결"""
+    return psycopg2.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, dbname=DB_NAME)
+
+def fetch_raw_reviews(place_id):
+    """PostgreSQL에서 Raw 리뷰 데이터 가져오기"""
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT review_id, review_text, rating FROM raw_reviews WHERE place_id = %s", (place_id,))
+    reviews = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return [{"review_id": row[0], "text": row[1], "rating": row[2]} for row in reviews]
+
 @models_bp.route("/analyze_reviews", methods=["GET"])
 def analyze_reviews():
+    """Raw 리뷰 데이터를 PostgreSQL에서 가져와 반환"""
     place_id = request.args.get("place_id")
     if not place_id:
         return jsonify({"error": "Missing place_id"}), 400
+    
+    # 🔹 분석 로직 실행
+    reviews = scrape_reviews(place_id)
+    if not reviews:
+        return jsonify({"message": "No reviews found"}), 200
 
-    unprocessed_reviews = fetch_unprocessed_reviews()
+    # 📌 PostgreSQL에 저장
+    conn = connect_db()
+    cursor = conn.cursor()
 
-    if not unprocessed_reviews:
-        return jsonify({"message": "No new reviews to analyze"}), 200
+    for review in reviews:
+        cursor.execute(
+            "INSERT INTO raw_reviews (place_id, review_id, review_text, rating) VALUES (%s, %s, %s, %s) ON CONFLICT (review_id) DO NOTHING",
+            (place_id, review["review_id"], review["text"], review["rating"])
+        )
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
 
-    results = []
-    for review_id, text in unprocessed_reviews:
-        category, sentiment_score = analyze_sentiment(text)
-        key_phrases = extract_key_phrases(text)
-        summary = summarize_text(text)
-
-        insert_review_analysis(review_id, category, sentiment_score, key_phrases, summary)
-
-        results.append({
-            "review_id": review_id,
-            "category": category,
-            "sentiment_score": sentiment_score,
-            "keywords": key_phrases,
-            "summary": summary
-        })
-
-    return jsonify({"message": "Reviews analyzed and stored", "results": results})
+    return jsonify({
+        "message": "Reviews successfully scraped and stored",
+        "reviews": reviews
+    })

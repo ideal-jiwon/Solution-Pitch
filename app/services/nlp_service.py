@@ -2,7 +2,7 @@ import requests
 import os
 
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+TEXT_ANALYTICS_ENDPOINT = os.getenv("TEXT_ANALYTICS_ENDPOINT")
 
 HEADERS = {
     "Ocp-Apim-Subscription-Key": AZURE_OPENAI_API_KEY,
@@ -11,7 +11,7 @@ HEADERS = {
 
 def analyze_sentiment(text):
     """Azure API를 사용하여 감성 분석 수행"""
-    url = f"{AZURE_OPENAI_ENDPOINT}/text/analytics/v3.1/sentiment"
+    url = f"{TEXT_ANALYTICS_ENDPOINT}/text/analytics/v3.1/sentiment"
     data = {"documents": [{"id": "1", "text": text}]}
 
     response = requests.post(url, headers=HEADERS, json=data)
@@ -24,7 +24,7 @@ def analyze_sentiment(text):
 
 def extract_key_phrases(text):
     """Azure API를 사용하여 주요 키워드 추출"""
-    url = f"{AZURE_OPENAI_ENDPOINT}/text/analytics/v3.1/keyPhrases"
+    url = f"{TEXT_ANALYTICS_ENDPOINT}/text/analytics/v3.1/keyPhrases"
     data = {"documents": [{"id": "1", "text": text}]}
 
     response = requests.post(url, headers=HEADERS, json=data)
@@ -36,7 +36,7 @@ def extract_key_phrases(text):
 
 def summarize_text(text):
     """Azure API를 사용하여 요약 생성"""
-    url = f"{AZURE_OPENAI_ENDPOINT}/text/analytics/v3.1/summarize"
+    url = f"{TEXT_ANALYTICS_ENDPOINT}/text/analytics/v3.1/summarize"
     data = {"documents": [{"id": "1", "text": text, "sentenceCount": 2}]}
 
     response = requests.post(url, headers=HEADERS, json=data)
@@ -45,4 +45,7 @@ def summarize_text(text):
     if "documents" in result:
         return " ".join(result["documents"][0].get("sentences", []))
     return text[:200]  # 기본적으로 200자만 유지
+
+
+
 
