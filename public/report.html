@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>HOME</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="css/styles.css"/>
+    <script defer src="js/chatbot.js"></script>
+    <script defer src="js/map.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcqraspdA5PdAI6mZQTElHBEkDRK0KY5A&libraries=places&callback=initMap"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <body>
+        <div id="header-container"></div> <!-- 헤더가 여기에 삽입됨 -->
+        
+        <main>
+            <fieldset class="report-search">
+                <legend></legend>
+                <label for="business-address">Business Address  </label>
+                <input type="text" id="autocomplete" placeholder="Enter a location">
+                <button onclick="searchLocation()">Search</button>
+            <div class = "googlesummary">  
+                <div id="map"></div>            
+                <h2 id="business-name"></h2> 
+            <div id="summary"> 
+                <h3>Report Summary</h3>
+                <label>Date Range:</label>
+                <input type="date" id="start-date"> - <input type = "date" id="end-date">
+                
+                <h4>Ratings</h4>
+                <p>Service: <span id="service-rating">-</span></p>
+                <p>Price: <span id="price-rating">-</span></p>
+                <p>Menu: <span id="menu-rating">-</span></p>
+                <p>Location: <span id="location-rating">-</span></p>
+                <p>Ambiance: <span id="ambiance-rating">-</span></p>
+            </div>
+        </div>  
+        
+        <!-- 🔹 Azure OpenAI 분석 결과 표시 -->
+        <div id="analysis-container">
+            <h3>AI Analysis</h3>
+            <label for="business-id-input">Test with Business ID:</label>
+            <input type="text" id="business-id-input" placeholder="Enter Business ID"/>
+            <button onclick="fetchFromInput()">Analyze</button>
+            <p id="analysis-result">Analysis will be displayed here after fetching data.</p>
+        </div>
+
+        <!-- 🔹 Chatbot UI 추가 -->
+        <div id="chatbot-container">
+            <h3>Ask the Chatbot</h3>
+            <div id="chatbox">
+                <div id="chat-messages"></div>
+                <input type="text" id="chat-input" placeholder="Ask about the restaurant...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        
+        <div id="strengths"></div>
+        <div id="weaknesses"></div>
+        <div id="restaurant-rank"></div>
+        <canvas id="ratings-chart"></canvas>
+
+    </main>
+        </fieldset>
+        </main>
+        <script src="js/header.js"></script> <!-- 헤더 포함하는 JavaScript -->
+        <script defer src="js/analysis.js"></script>
+</body>
+</html>
