@@ -1,4 +1,12 @@
 async function fetchAnalysis(placeId) {
+    if (!placeId) {
+        console.error("Invalid place_id:", placeId);
+        document.getElementById("analysis-result").textContent = "Invalid place ID.";
+        return;
+    }
+
+    console.log("Requesting analysis for place_id:", placeId);
+
     try {
         const response = await fetch(`/analyze_reviews?place_id=${placeId}`);
         const data = await response.json();
@@ -23,6 +31,7 @@ async function fetchAnalysis(placeId) {
         document.getElementById("analysis-result").textContent = "Failed to fetch analysis.";
     }
 }
+
 
 // 📌 장소 검색 후 자동으로 분석 요청
 async function searchLocation() {

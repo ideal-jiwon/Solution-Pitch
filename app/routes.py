@@ -1,45 +1,37 @@
 from flask import Blueprint, request, jsonify
 import requests
 import os
-from app.nlp_models import categorize_review, analyze_review_relationships, sentiment_analyzer
-
-main_bp = Blueprint("main", __name__)
-
-@main_bp.route("/analyze_reviews", methods=["GET"])
-def analyze_reviews():
-    place_id = request.args.get("place_id")
-    if not place_id:
-        return jsonify({"error": "Missing place_id"}), 400
-
-    url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&fields=name,reviews&key={os.getenv('GOOGLE_PLACES_API_KEY')}"
-    response = requests.get(url)
-    data = response.json()
-
-    if "reviews" not in data.get("result", {}):
-        return jsonify({"error": "No reviews found"})
-
-    reviews = data["result"]["reviews"]
-    processed_reviews = []
-
-    for review in reviews:
-        sentiment = sentiment_analyzer(review["text"])[0]
-        categories = categorize_review(review["text"])
-
-        processed_reviews.append({
-            "author": review["author_name"],
-            "rating": review["rating"],
-            "text": review["text"],
-            "sentiment": sentiment["label"],
-            "confidence": sentiment["score"],
-            "categories": categories
-        })
-
-    analysis_result = analyze_review_relationships(processed_reviews)
-
-    return jsonify({
-        "reviews": processed_reviews,
-        "relationship_analysis": analysis_result
-    })
+places_bp = Blueprint("places", __name__)
 
 
+# Google Places API Key
+GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
 
+# Google Places API v1 searchText URL
+PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
+
+@places_bp.route("/places/search", methods=["POST"])
+def search_places():
+    """Google Places API - searchText 방식으로 장소 검색"""
+    data = request.json
+    query = data.get("query")
+
+    if not query:
+        return jsonify({"error": "Query parameter is required"}), 400
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+         "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location"
+    }
+    
+    payload = {
+        "textQuery": query
+    }
+
+    response = requests.post(PLACES_SEARCH_URL, json=payload, headers=headers)
+
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to fetch data", "details": response.text}), response.status_code
+
+    return jsonify(response.json())
