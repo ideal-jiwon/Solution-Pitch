@@ -51,7 +51,7 @@
 
         <!-- 🔹 Chatbot UI 추가 -->
         <div id="chatbot-container">
-            <h3>Ask the Chatbot</h3>
+            <h3>Ask Ratatuoile</h3>
             <div id="chatbox">
                 <div id="chat-messages"></div>
                 <input type="text" id="chat-input" placeholder="Ask about the restaurant...">
@@ -59,15 +59,25 @@
             </div>
         </div>
         
-        <div id="strengths"></div>
-        <div id="weaknesses"></div>
+        <div id="review-characteristics" class="review-visuals-container"></div>
+        <div id="sentiment-distribution"></div>
         <div id="restaurant-rank"></div>
+
+        <div class="comparison-summary">
+            <div id="strengths" class="card-section"></div>
+            <div id="weaknesses" class="card-section"></div>
+        </div>
+        <canvas id="category-comparison-chart"></canvas>
         <canvas id="ratings-chart"></canvas>
+        <label for="shop-image">📷 Upload your shop photo:</label>
+        <input type="file" id="shop-image" accept="image/*" />
+        <button onclick="submitImage()">Analyze</button>
+        <div id="photo-analysis-result"></div>
 
     </main>
         </fieldset>
         </main>
-        <script src="js/header.js"></script> <!-- 헤더 포함하는 JavaScript -->
+        <script src="js/header.js"></script> 
         <script defer src="js/analysis.js"></script>
 </body>
 </html>

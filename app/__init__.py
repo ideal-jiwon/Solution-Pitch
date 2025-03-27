@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 from app.routes import places_bp
 from app.auth import auth_bp
 from app.models import models_bp
+from app.chat import chat_bp
+from app.remind import remind_bp
+from app.photo import photo_bp
 
 # 🔹 환경 변수 로드
 load_dotenv()
@@ -21,6 +24,9 @@ CORS(app)
 app.register_blueprint(places_bp, url_prefix="/api")
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(models_bp, url_prefix="/models")
+app.register_blueprint(chat_bp)
+app.register_blueprint(remind_bp)
+app.register_blueprint(photo_bp, url_prefix="/photo")
 
 # 🔹 기본 페이지 제공
 @app.route("/")

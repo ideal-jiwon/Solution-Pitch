@@ -44,38 +44,6 @@ def insert_businesses(csv_path):
     cursor.close()
     conn.close()
     print("✅ businesses 삽입 완료")
-"""
-def insert_users(csv_path):
-    conn = connect_db()
-    cursor = conn.cursor()
-
-    chunk_size = 10000  # 대용량 처리를 위한 청크 단위
-
-    try:
-        for chunk in pd.read_csv(csv_path, chunksize=chunk_size, usecols=["user_id"]):
-            chunk.dropna(subset=["user_id"], inplace=True)  # user_id 없는 행 제거
-
-            values = [(str(row["user_id"]),) for _, row in chunk.iterrows()]
-
-            query = 
-                INSERT INTO users (user_id)
-                VALUES %s
-                ON CONFLICT (user_id) DO NOTHING;
-            
-
-            try:
-                execute_values(cursor, query, values, page_size=1000)
-                conn.commit()
-                print(f"✅ 청크 {len(values)}건 user_id 삽입 완료")
-            except Exception as e:
-                print(f"❌ 청크 삽입 에러: {e}")
-                conn.rollback()
-
-    finally:
-        cursor.close()
-        conn.close()
-        print("✅ 전체 user_id 삽입 작업 완료")
-"""
 
 def insert_reviews(csv_path):
     conn = connect_db()

@@ -5,3 +5,6 @@ openai
 requests
 python-dotenv
 gunicorn
+torch
+sentence-transformers
+Pillow

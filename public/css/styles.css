@@ -198,6 +198,51 @@ main {
     color: #333;
 }
 
+.review-visuals-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.review-visuals-container canvas {
+    flex: 1;
+    max-width: 48%;
+}
+
+.review-visuals-container .treemap-box {
+    flex: 1;
+    max-width: 48%;
+}
+
+.treemap-box div {
+    margin-top: 1rem;
+}
+
+.treemap-box h4 {
+    margin-bottom: 0.5rem;
+}
+
+.comparison-summary {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    gap: 2rem;
+}
+.card-section {
+    flex: 1 1 45%;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f4f4f4;
+}
+.card-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+
 /* 챗봇 스타일 */
 #chatbot-container {
     width: 300px;
@@ -209,6 +254,7 @@ main {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
+    display: hidden;
 }
 
 #chatbox {

@@ -40,4 +40,68 @@ def realtime_sentiment():
         "business_id": business_id,
         "analyzed_reviews": analyzed_reviews
     })
+@models_bp.route("/compare_reviews", methods=["GET"])
+def compare_reviews():
+    business_id = request.args.get("business_id")
+    if not business_id:
+        return jsonify({"error": "Missing business_id"}), 400
 
+    conn = connect_db()
+    cursor = conn.cursor()
+
+# 🔹 1. 내 매장의 도시 정보 가져오기
+    cursor.execute("SELECT city FROM businesses WHERE business_id = %s", (business_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Business not found"}), 404
+    city = row[0]
+
+    # 🔹 2. 내 매장 리뷰 가져오기
+    cursor.execute("SELECT text FROM reviews WHERE business_id = %s LIMIT 30", (business_id,))
+    my_reviews = [r[0] for r in cursor.fetchall()]
+
+    # 🔹 3. 같은 도시 내 다른 매장들의 리뷰 가져오기
+    cursor.execute("""
+        SELECT r.text FROM reviews r
+        JOIN businesses b ON r.business_id = b.business_id
+        WHERE b.city = %s AND r.business_id != %s
+        LIMIT 100
+    """, (city, business_id))
+    other_reviews = [r[0] for r in cursor.fetchall()]
+
+    cursor.close()
+    conn.close()
+
+    if not my_reviews or not other_reviews:
+        return jsonify({"error": "Insufficient review data"}), 400
+
+    # 🔎 분석 유틸리티 함수
+    def analyze_group(reviews):
+        category_scores = {}
+        category_count = {}
+
+        for text in reviews:
+            sentiment, confidence = analyze_sentiment(text)
+            category = classify_category(text)
+
+            if category not in category_scores:
+                category_scores[category] = 0
+                category_count[category] = 0
+
+            category_scores[category] += confidence.get("positive", 0)
+            category_count[category] += 1
+
+        return {
+            category: category_scores[category] / category_count[category]
+            for category in category_scores
+        }
+
+    my_scores = analyze_group(my_reviews)
+    others_scores = analyze_group(other_reviews)
+
+    return jsonify({
+        "business_id": business_id,
+        "city": city,
+        "my_scores": my_scores,
+        "nearby_scores": others_scores
+    })
