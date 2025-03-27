@@ -19,10 +19,14 @@
         
         <main>
             <fieldset class="report-search">
-                <legend></legend>
-                <label for="business-address">Business Address  </label>
-                <input type="text" id="autocomplete" placeholder="Enter a location">
-                <button onclick="searchLocation()">Search</button>
+                <div id="manual-search">
+                    <input type="text" id="b-name" placeholder="Business Name">
+                    <input type="text" id="b-address" placeholder="Address">
+                    <input type="text" id="b-city" placeholder="City">
+                    <input type="text" id="b-state" placeholder="State">
+                    <input type="text" id="b-postal" placeholder="Postal Code">
+                    <button onclick="searchBusiness()">Search My Business</button>
+                </div>
             <div class = "googlesummary">  
                 <div id="map"></div>            
                 <h2 id="business-name"></h2> 
