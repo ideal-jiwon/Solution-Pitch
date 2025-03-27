@@ -8,6 +8,7 @@ from app.models import models_bp
 from app.chat import chat_bp
 from app.remind import remind_bp
 from app.photo import photo_bp
+from app.search import search_bp
 
 # 🔹 환경 변수 로드
 load_dotenv()
@@ -27,6 +28,7 @@ app.register_blueprint(models_bp, url_prefix="/models")
 app.register_blueprint(chat_bp)
 app.register_blueprint(remind_bp)
 app.register_blueprint(photo_bp, url_prefix="/photo")
+app.register_blueprint(search_bp)
 
 # 🔹 기본 페이지 제공
 @app.route("/")

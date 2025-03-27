@@ -93,86 +93,58 @@ async function loadDefaultLocation() {
 }
 
 // 📌 7️⃣ 장소 검색 (`searchText` API 사용)
-async function searchLocation() {
-    const query = document.getElementById("autocomplete").value;
-    if (!query) {
-        alert("Please enter a location.");
+async function searchBusiness() {
+    const name = document.getElementById("b-name").value.trim();
+    const address = document.getElementById("b-address").value.trim();
+    const city = document.getElementById("b-city").value.trim();
+    const state = document.getElementById("b-state").value.trim();
+    const postal_code = document.getElementById("b-postal").value.trim();
+
+    if (!name || !address || !city || !state || !postal_code) {
+        alert("모든 항목을 입력해주세요.");
         return;
     }
 
     try {
-        const response = await fetch("/api/places/search", {
+        const res = await fetch("/search", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ query })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, address, city, state, postal_code })
         });
 
-        const data = await response.json();
-        console.log("API Response:", data);
-
-        if (data.places && data.places.length > 0) {
-            const firstPlace = data.places[0];  // 첫 번째 검색 결과 사용
-            console.log("First Place:", firstPlace);
-
-            if (!firstPlace.id) {
-                console.warn("❌ No place_id found in API response.");
-                return;
-            }
-            const location = {
-                lat: firstPlace.location.latitude,
-                lng: firstPlace.location.longitude
-            };
-
-            // 지도 이동
-            map.setCenter(location);
-            map.setZoom(15);
-        
-
-            // 마커 업데이트
-            marker.position = location;
-            marker.title = firstPlace.displayName.text;
-
-            document.getElementById("business-name").textContent = firstPlace.displayName.text;
-
-            // 🔹 `place_id`가 존재하면 분석 요청 실행
-            console.log("✅ Fetching analysis for place_id:", firstPlace.id);
-            fetchAnalysis(firstPlace.id);
-        } else {
-            alert("No places found.");
-        }
-    } catch (error) {
-        console.error("Error fetching places:", error);
-    }
-}
-async function fetchAnalysis(placeId) {
-    if (!placeId) {
-        console.error("❌ Invalid place_id:", placeId);
-        document.getElementById("analysis-result").textContent = "Invalid place ID.";
-        return;
-    }
-
-    console.log("Requesting analysis for place_id:", placeId);
-
-    try {
-        const response = await fetch(`/analyze_reviews?place_id=${placeId}`);
-        const data = await response.json();
-
+        const data = await res.json();
         if (data.error) {
-            console.error("❌ Error fetching reviews:", data.error);
-            document.getElementById("analysis-result").textContent = "Error fetching reviews.";
+            alert("비즈니스 검색 실패: " + data.error);
             return;
         }
 
-        // 📌 Raw JSON 데이터를 UI에 표시
-        document.getElementById("analysis-result").innerHTML = `<pre>${JSON.stringify(data.reviews, null, 2)}</pre>`;
+        // 지도에 표시
+        const coords = {
+            lat: data.coordinates.latitude,
+            lng: data.coordinates.longitude
+        };
+        
+        map.setCenter(coords);
+        map.setZoom(15);
+        
+        marker?.setMap(null);
+        marker = new google.maps.Marker({
+            map,
+            position: coords,
+            title: data.name
+        });
+        
+        document.getElementById("business-name").textContent = data.name;
+        fetchAnalysis(data.business_id);
 
+        // NLP 분석 호출
+        fetchAnalysis(data.business_id);
     } catch (error) {
-        console.error("❌ Network error:", error);
-        document.getElementById("analysis-result").textContent = `Network Error: ${error.message}`;
+        console.error("❌ Search error:", error);
+        alert("검색 중 오류 발생");
     }
 }
+
 
 // 📌 9️⃣ Google Maps API 로드
 loadGoogleMaps();
