@@ -71,30 +71,7 @@ def extract_key_phrases(text):
         print(f"❌ 키워드 추출 실패: {e}")
 
     return []
-"""
-def summarize_text(text):
-    
-    url = f"{TEXT_ANALYTICS_ENDPOINT}/text/analytics/v3.2-preview.1/summarize"
-    data = {
-        "documents": [{"id": "1", "language": "en", "text": text}],
-        "sentenceCount": 2
-    }
 
-    try:
-        response = requests.post(url, headers=HEADERS, json=data)
-        result = response.json()
-        print("📝 Summarize Response:", result)
-
-        if "documents" in result and result["documents"]:
-            sentences = result["documents"][0].get("sentences", [])
-            return " ".join([s["text"] for s in sentences])
-        else:
-            print("❌ 요약 결과 없음:", result)
-    except Exception as e:
-        print(f"❌ 요약 실패: {e}")
-
-    return text[:200]  # fallback 요약
-"""
 
 
 

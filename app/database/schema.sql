@@ -27,16 +27,5 @@ CREATE TABLE IF NOT EXISTS reviews (
     cool INTEGER,
     place_id VARCHAR(255)
 );
-/**
--- User 테이블
-CREATE TABLE IF NOT EXISTS users (
-    user_id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255),
-    review_count INTEGER,
-    yelping_since DATE,
-    average_stars FLOAT,
-    friends TEXT,  -- 기존 TEXT[] → TEXT로 변경
-    fans INTEGER
-);
-**/
+
 

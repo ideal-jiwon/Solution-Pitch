@@ -1,12 +1,33 @@
 async function sendMessage() {
-    const userInput = document.getElementById("chat-input").value;
-    if (!userInput.trim()) return;
+    const userInput = document.getElementById("chat-input").value.trim();
+    if (!userInput) return;
 
-    // 사용자 입력 표시
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
 
-    // 백엔드 요청
+    // ✅ Remind 입력 처리
+    if (userInput.toLowerCase().startsWith("remind:")) {
+        const note = userInput.slice(7).trim();
+        try {
+            const res = await fetch("/remind", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ note })
+            });
+            const data = await res.json();
+            if (data.message) {
+                chatMessages.innerHTML += `<p><strong>Bot:</strong> ✅ 알림에 저장했어요: ${note}</p>`;
+            } else {
+                chatMessages.innerHTML += `<p><strong>Bot:</strong> ⚠️ 저장에 실패했어요.</p>`;
+            }
+        } catch (err) {
+            chatMessages.innerHTML += `<p><strong>Bot:</strong> ❌ 오류 발생: ${err.message}</p>`;
+        }
+        document.getElementById("chat-input").value = "";
+        return;
+    }
+
+    // 🤖 일반 챗봇 응답 처리 (예: /chat 호출)
     try {
         const response = await fetch("/chat", {
             method: "POST",
@@ -15,8 +36,6 @@ async function sendMessage() {
         });
 
         const data = await response.json();
-
-        // 챗봇 응답 표시
         chatMessages.innerHTML += `<p><strong>Bot:</strong> ${data.response}</p>`;
     } catch (error) {
         console.error("Error sending message:", error);
@@ -25,3 +44,4 @@ async function sendMessage() {
 
     document.getElementById("chat-input").value = "";
 }
+
