@@ -6,7 +6,7 @@ Turn messy reviews into actionable insights using NLP, visualizations, and a cha
 ---
 
 ## 🌐 Live Demo
-[Watch Demo Video](https://your-youtube-demo-link.com)
+[Watch Demo Video](https://youtu.be/3tz_CI7PQ_E)
 
 ---
 
