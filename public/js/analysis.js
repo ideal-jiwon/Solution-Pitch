@@ -1,4 +1,4 @@
-// 📌 NLP 분석 결과 시각화
+// NLP 
 async function fetchAnalysis(businessId) {
     const loading = document.getElementById("loading-indicator");
     loading.style.display = "flex";
@@ -115,7 +115,10 @@ function drawSentimentBar(averages) {
             datasets: [{
                 label: "Customer Sentiment Intensity",
                 data: values,
-                backgroundColor: ["#2ecc71", "#f1c40f", "#e74c3c"]
+                backgroundColor: ["#90be6d", "#f9c74f", "#f3722c"],
+                borderRadius: 12,              
+                barPercentage: 0.5,            
+                categoryPercentage: 0.6 
             }]
         },
         options: {
@@ -148,7 +151,7 @@ function drawSentimentFrequency(frequency) {
     container.innerHTML = "<h3>📊 What's people's impression?</h3>";
 
     const wrapper = document.createElement("div");
-    wrapper.className = "sentiment-chart-wrapper";  // ✅ flex wrapper 추가
+    wrapper.className = "sentiment-chart-wrapper";  // flex wrapper 
 
     const canvas = document.createElement("canvas");
     canvas.id = "sentiment-freq-chart";
@@ -168,7 +171,7 @@ function drawSentimentFrequency(frequency) {
             datasets: [{
                 label: "Sentiment Distribution",
                 data: data,
-                backgroundColor: ["#2ecc71", "#f1c40f", "#e74c3c", "#95a5a6"]
+                backgroundColor: ["#90be6d", "#f9c74f", "#277da1", "#f3722c"]
             }]
         },
         options: {
@@ -226,7 +229,10 @@ function drawGroupedKeywords(categoryScores, keywordMap) {
             datasets: [{
                 label: "Avg. Positive Sentiment (%)",
                 data: avgScores.map(s => (s * 100).toFixed(1)),
-                backgroundColor: "rgba(100, 149, 237, 0.6)"
+                backgroundColor: "rgba(103, 141, 212, 0.8)",
+                borderRadius: 12,
+                barPercentage: 0.5,
+                categoryPercentage: 0.6
             }]
         },
         options: {
@@ -293,12 +299,18 @@ function drawComparisonChart(my, others) {
                 {
                     label: "My Business",
                     data: myData,
-                    backgroundColor: "rgba(46, 204, 113, 0.7)",
+                    backgroundColor: "rgba(46, 204, 113, 0.8)",
+                    borderRadius: 12,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.6
                 },
                 {
                     label: "Others (Nearby)",
                     data: otherData,
-                    backgroundColor: "rgba(231, 76, 60, 0.6)",
+                    backgroundColor: "rgba(231, 76, 60, 0.7)",
+                    borderRadius: 12,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.6
                 }
             ]
         },
@@ -313,7 +325,26 @@ function drawComparisonChart(my, others) {
             }
         }
     });
-}
+    
+    const summary = document.createElement("div");
+    summary.className = "comparison-summary";
+    summary.style.marginTop = "20px";
+
+    const strong = [];
+    const weak = [];
+
+    labels.forEach((label, i) => {
+        const diff = myData[i] - otherData[i];
+        if (diff >= 5) {
+            strong.push(`<li>✅ Your business is doing great in <strong>${label}</strong> (+${diff}%)</li>`);
+        } else if (diff <= -5) {
+            weak.push(`<li>⚠️ You're behind in <strong>${label}</strong> (${diff}%) compared to nearby competitors</li>`);
+        }
+    });
+    
+    }
+
+
 
 function drawComparisonSummary(my, others) {
     const strengthList = [];

@@ -348,6 +348,29 @@ main {
     display: block;
     margin: 20px auto;
 }
+.comparison-highlight {
+    display: flex;
+    margin-top: 0.5rem;
+}
+.comparison-highlight li {
+    list-style: none;
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.comparison-highlight li strong {
+    color: #333;
+}
+
+.comparison-highlight li:has(✅) {
+    border-left-color: #2ecc71;
+}
+
+.comparison-highlight li:has(⚠️) {
+    border-left-color: #e74c3c;
+}
 
 /* chatbot */
 #chat-toggle-button {
