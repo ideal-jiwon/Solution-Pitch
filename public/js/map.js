@@ -135,7 +135,6 @@ async function searchBusiness() {
         });
         
         document.getElementById("business-name").textContent = data.name;
-        fetchAnalysis(data.business_id);
 
         // NLP 분석 호출
         fetchAnalysis(data.business_id);

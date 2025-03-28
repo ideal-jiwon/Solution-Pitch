@@ -21,7 +21,7 @@ def get_image_embedding_from_url(url):
     return model.encode(image, convert_to_tensor=True)
 
 def get_image_embedding_from_path(path):
-    model = get_model()  # ✅ 이 줄 추가 필요
+    model = get_model()
     image = Image.open(path).convert("RGB")
     return model.encode(image, convert_to_tensor=True)
 
@@ -32,7 +32,6 @@ def fetch_popular_pexels_images(query="cafe", per_page=6):
 
     res = requests.get("https://api.pexels.com/v1/search", headers=headers, params=params)
     
-    # 🔍 로그 찍기
     print("🔍 Pexels status:", res.status_code)
     print("🔍 Pexels response:", res.json())
 
@@ -42,10 +41,10 @@ def fetch_popular_pexels_images(query="cafe", per_page=6):
 
 def compare_with_pexels(uploaded_path):
     target_embedding = get_image_embedding_from_path(uploaded_path)
-    pexels_images = fetch_popular_pexels_images()  # ⬅️ query 없이 기본값 사용
+    pexels_images = fetch_popular_pexels_images()
 
     if not pexels_images:
-        return [], "❌ Pexels에서 유사 이미지를 찾을 수 없었어요."
+        return [], "❌ We could not find any references in Pexels"
 
     scores = []
     for url in pexels_images:
@@ -55,25 +54,25 @@ def compare_with_pexels(uploaded_path):
 
     best = sorted(scores, key=lambda x: -x[1])
     if not best:
-        return [], "❌ 유사 이미지를 분석하는 데 실패했어요."
+        return [], "❌ We failed analysing photos"
 
     return best[:3], generate_solution(best[0][1])
 
     
 def generate_solution(similarity_score):
     if similarity_score > 0.9:
-        return "사진 퀄리티가 매우 높아요! 그대로 유지하세요 👏"
+        return "Your photo is very simliar to popular photos in Social Media"
     elif similarity_score > 0.75:
-        return "조명/구도를 조금 더 개선하면 더 눈에 띌 수 있어요 💡"
+        return "Why don't you work on lighting and angles? See our references"
     else:
-        return "사진이 어두워 보일 수 있어요. 자연광 또는 더 선명한 사진을 시도해보세요 📸"
+        return "Photos are too dark. Try uploading photos with natural sunlight or vivid"
     
-def compare_with_pexels(uploaded_path, query="cafe"):
+def compare_with_pexels(uploaded_path, query="restaurant"):
     target_embedding = get_image_embedding_from_path(uploaded_path)
     pexels_images = fetch_popular_pexels_images(query)
 
     if not pexels_images:
-        return [], "❌ Pexels에서 유사 이미지를 찾을 수 없었어요. 검색어를 바꿔보세요!"
+        return [], "❌ We could not find any references in Pexels"
 
     scores = []
     for url in pexels_images:
@@ -85,7 +84,7 @@ def compare_with_pexels(uploaded_path, query="cafe"):
     
     # 🔐 안전하게 처리
     if not best:
-        return [], "❌ 유사 이미지를 분석하는 데 실패했어요."
+        return [], "❌ We failed to analyze photos"
 
     return best[:3], generate_solution(best[0][1])
 

@@ -15,72 +15,73 @@
 </head>
 <body>
     <body>
-        <div id="header-container"></div> <!-- 헤더가 여기에 삽입됨 -->
+        <div id="header-container"></div> <!-- HEADER -->
         
         <main>
-            <fieldset class="report-search">
-                <div id="manual-search">
-                    <input type="text" id="b-name" placeholder="Business Name">
-                    <input type="text" id="b-address" placeholder="Address">
-                    <input type="text" id="b-city" placeholder="City">
-                    <input type="text" id="b-state" placeholder="State">
-                    <input type="text" id="b-postal" placeholder="Postal Code">
-                    <button onclick="searchBusiness()">Search My Business</button>
-                </div>
-            <div class = "googlesummary">  
-                <div id="map"></div>            
-                <h2 id="business-name"></h2> 
-            <div id="summary"> 
-                <h3>Report Summary</h3>
-                <label>Date Range:</label>
-                <input type="date" id="start-date"> - <input type = "date" id="end-date">
+            
+                <div class="googlesummary">  
+                    <div id="map"></div>
                 
-                <h4>Ratings</h4>
-                <p>Service: <span id="service-rating">-</span></p>
-                <p>Price: <span id="price-rating">-</span></p>
-                <p>Menu: <span id="menu-rating">-</span></p>
-                <p>Location: <span id="location-rating">-</span></p>
-                <p>Ambiance: <span id="ambiance-rating">-</span></p>
-            </div>
-        </div>  
+                    <div id="manual-search">
+                        <h3>Search My Business</h3>
+                        <input type="text" id="b-name" placeholder="Business Name">
+                        <input type="text" id="b-address" placeholder="Address">
+                        <input type="text" id="b-city" placeholder="City">
+                        <input type="text" id="b-state" placeholder="State">
+                        <input type="text" id="b-postal" placeholder="Postal Code">
+                        <button onclick="searchBusiness()">Search</button>
+                    </div>
+                </div>
+                
+                <h2 id="business-name"></h2>
+                <div id="sentiment-distribution"></div>
+                <div id="review-characteristics" class="review-visuals-container"></div>
         
-        <!-- 🔹 Azure OpenAI 분석 결과 표시 -->
-        <div id="analysis-container">
-            <h3>AI Analysis</h3>
-            <label for="business-id-input">Test with Business ID:</label>
-            <input type="text" id="business-id-input" placeholder="Enter Business ID"/>
-            <button onclick="fetchFromInput()">Analyze</button>
-            <p id="analysis-result">Analysis will be displayed here after fetching data.</p>
-        </div>
-
-        <!-- 🔹 Chatbot UI 추가 -->
-        <div id="chatbot-container">
-            <h3>Ask Ratatuoile</h3>
-            <div id="chatbox">
-                <div id="chat-messages"></div>
-                <input type="text" id="chat-input" placeholder="Ask about the restaurant...">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-        
-        <div id="review-characteristics" class="review-visuals-container"></div>
-        <div id="sentiment-distribution"></div>
-        <div id="restaurant-rank"></div>
+                <div id="restaurant-rank"></div>
 
         <div class="comparison-summary">
             <div id="strengths" class="card-section"></div>
             <div id="weaknesses" class="card-section"></div>
         </div>
+
         <canvas id="category-comparison-chart"></canvas>
-        <canvas id="ratings-chart"></canvas>
 
+        <div class="sentiment-chart">
+            <h3>📈 How Strongly Do People Feel About Your Business?</h3>
+            <div class="sentiment-chart-wrapper">
+                <canvas id="ratings-chart"></canvas>
+                <div id="sentiment-insight" class="sentiment-summary-text"></div>
+            </div>
+        </div>
 
-        <label for="shop-image">📷 Upload your shop photo:</label>
-        <input type="file" id="shop-image" accept="image/*" />
-        <button onclick="submitImage()">Analyze</button>
-        <div id="photo-analysis-result"></div>
+        <div id="analysis-result"></div>
 
-        </fieldset>
+        <div id="shop-upload-section">
+            <label for="shop-image"> Upload your shop photo here</label>
+            <p>If you want more LIKES on Social Media, see what you can improve!</p>
+            <input type="file" id="shop-image" accept="image/*" />
+            <br>
+            <button onclick="submitImage()">📷 Analyze</button>
+            <div id="photo-analysis-result"></div>
+        </div>
+
+        <button id="chat-toggle-button">💬</button>
+        <div id="chatbot-container" class="hidden">
+            <h3>Send your tasks to Apple Reminder</h3>
+            <div id="chatbox">
+                <div id="chat-messages"></div>
+                <input type="text" id="chat-input" 
+                       placeholder="If you have any tasks, please type here!
+                                    It will be sent to your apple reminder"/>
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <div id="loading-indicator">
+            <div class="spinner"></div>
+            <p>Analyzing reviews... Hang tight!</p>
+        </div>
+
         </main>
         <script src="js/header.js"></script> 
         <script defer src="js/analysis.js"></script>

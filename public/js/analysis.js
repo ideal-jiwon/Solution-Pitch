@@ -1,8 +1,12 @@
 // 📌 NLP 분석 결과 시각화
 async function fetchAnalysis(businessId) {
+    const loading = document.getElementById("loading-indicator");
+    loading.style.display = "flex";
+
     if (!businessId) {
         console.error("❌ Invalid business_id:", businessId);
         document.getElementById("analysis-result").textContent = "Invalid business ID.";
+        loading.style.display = "none";
         return;
     }
 
@@ -16,6 +20,7 @@ async function fetchAnalysis(businessId) {
         if (data.error) {
             console.error("❌ Error fetching analysis:", data.error);
             document.getElementById("analysis-result").textContent = "Error fetching analysis.";
+            loading.style.display = "none";
             return;
         }
 
@@ -54,7 +59,6 @@ async function fetchAnalysis(businessId) {
         drawSentimentBar(avgSentimentScores);
         drawSentimentFrequency(sentimentDistribution);
         drawGroupedKeywords(categoryScores, keywordMap);
-        
 
         if (data.my_scores && data.nearby_scores) {
             drawComparisonChart(data.my_scores, data.nearby_scores);
@@ -64,8 +68,11 @@ async function fetchAnalysis(businessId) {
         console.error("❌ Fetch failed:", error);
         document.getElementById("analysis-result").textContent = "Failed to fetch analysis.";
     }
-    fetchComparisonData(businessId);
+    await fetchComparisonData(businessId);
+    loading.style.display = "none";
+    
 }
+
 async function fetchComparisonData(businessId) {
     try {
         const res = await fetch(`/models/compare_reviews?business_id=${businessId}`);
@@ -89,58 +96,110 @@ function fetchFromInput() {
     fetchAnalysis(businessId);
 }
 
-// 📊 감정 평균 바 차트
 function drawSentimentBar(averages) {
     const ctx = document.getElementById("ratings-chart").getContext("2d");
     if (window.sentimentBarChart) window.sentimentBarChart.destroy();
 
+    const labels = ["Loyal Advocates", "Casual Visitors", "Unhappy Customers"];
+    const values = [
+        (averages.positive * 100).toFixed(1),
+        (averages.neutral * 100).toFixed(1),
+        (averages.negative * 100).toFixed(1)
+    ];
+
+    // 바 차트
     window.sentimentBarChart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: ["Positive", "Neutral", "Negative"],
+            labels: labels,
             datasets: [{
-                label: "Average Confidence",
-                data: [averages.positive, averages.neutral, averages.negative],
-                backgroundColor: ["green", "gray", "red"]
+                label: "Customer Sentiment Intensity",
+                data: values,
+                backgroundColor: ["#2ecc71", "#f1c40f", "#e74c3c"]
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } }
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: 100,
+                    ticks: {
+                        callback: v => v + "%"
+                    }
+                }
+            }
         }
     });
+
+    // summary
+    const insightBox = document.getElementById("sentiment-insight");
+    insightBox.innerHTML = `
+        Your business has a strong base of <strong>Loyal Advocates</strong> (${values[0]}%), 
+        but <strong>${values[2]}%</strong> of reviewers are <strong>Unhappy Customers</strong> — 
+        consider addressing their pain points to improve customer retention.
+    `;
 }
 
-// 📊 감정 빈도 바 차트
+
 function drawSentimentFrequency(frequency) {
+    const container = document.getElementById("sentiment-distribution");
+    container.innerHTML = "<h3>📊 What's people's impression?</h3>";
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "sentiment-chart-wrapper";  // ✅ flex wrapper 추가
+
     const canvas = document.createElement("canvas");
     canvas.id = "sentiment-freq-chart";
-    const container = document.getElementById("sentiment-distribution");
-    container.innerHTML = "<h3>Sentiment Distribution</h3>";
-    container.appendChild(canvas);
+    wrapper.appendChild(canvas);
 
     const ctx = canvas.getContext("2d");
+
+    const labels = Object.keys(frequency);
+    const data = Object.values(frequency);
+    const total = data.reduce((a, b) => a + b, 0);
+    const percentages = data.map((val) => ((val / total) * 100).toFixed(1));
+
     new Chart(ctx, {
-        type: "bar",
+        type: "pie",
         data: {
-            labels: Object.keys(frequency),
+            labels: labels.map((label, i) => `${label} (${percentages[i]}%)`),
             datasets: [{
-                label: "Review Count",
-                data: Object.values(frequency),
-                backgroundColor: "#ffa600"
+                label: "Sentiment Distribution",
+                data: data,
+                backgroundColor: ["#2ecc71", "#f1c40f", "#e74c3c", "#95a5a6"]
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } }
+            maintainAspectRatio: false,
+            layout: {
+                padding: 10
+            },
+            plugins: {
+                legend: {
+                    position: "right"
+                }
+            }
         }
     });
+
+    const summary = document.createElement("div");
+    summary.className = "summary-text";  
+    summary.innerHTML = labels.map((label, i) => {
+        return `<p><strong>${label}</strong>: ${percentages[i]}%</p>`;
+    }).join("");
+
+    wrapper.appendChild(summary);
+    container.appendChild(wrapper);
 }
 
-// 🔄 키워드 요약 및 시각화
+
+
 function drawGroupedKeywords(categoryScores, keywordMap) {
     const container = document.getElementById("review-characteristics");
-    container.innerHTML = "<h3>📊 Review Characteristics of My Business</h3>";
+    container.innerHTML = "<h3> Review Characteristics of My Business</h3>";
 
     const summary = document.createElement("p");
     const categories = Object.keys(categoryScores);
@@ -152,7 +211,7 @@ function drawGroupedKeywords(categoryScores, keywordMap) {
     const maxIdx = avgScores.indexOf(Math.max(...avgScores));
     const minIdx = avgScores.indexOf(Math.min(...avgScores));
 
-    summary.textContent = `📝 My business has the most reviews about ${categories[maxIdx]} (satisfaction: ${(avgScores[maxIdx] * 100).toFixed(1)}%), and the least about ${categories[minIdx]} (satisfaction: ${(avgScores[minIdx] * 100).toFixed(1)}%).`;
+    summary.textContent = ` My business has the most reviews about ${categories[maxIdx]} (satisfaction: ${(avgScores[maxIdx] * 100).toFixed(1)}%),and the least about ${categories[minIdx]} (satisfaction: ${(avgScores[minIdx] * 100).toFixed(1)}%).`;
     container.appendChild(summary);
 
     const wrapper = document.createElement("div");
@@ -195,31 +254,29 @@ function drawGroupedKeywords(categoryScores, keywordMap) {
     sorted.slice(0, 8).forEach(([word, count]) => {
         const box = document.createElement("div");
         box.textContent = word;
-        box.style.display = "flex";
-        box.style.alignItems = "center";
-        box.style.justifyContent = "center";
-        box.style.aspectRatio = "1/1";
-        box.style.borderRadius = "12px";
+    
+        const scale = 80 + 80 * (count / maxCount); // 최소 80px ~ 최대 160px
+    
+        box.style.width = `${scale}px`;
+        box.style.height = `${scale}px`;
+    
         box.style.background = `rgba(144, 86, 255, ${0.3 + 0.7 * (count / maxCount)})`;
-        box.style.color = "white";
-        box.style.fontSize = "0.9rem";
-        box.style.wordBreak = "break-word";
+    
         treemap.appendChild(box);
     });
 
     wrapper.appendChild(treemap);
     container.appendChild(wrapper);
-    
+
     window.analysisSummary = {
         categoryScores,
         keywordMap
     };
 }
 
-// 📊 내 사업체 vs 근처 비교
 function drawComparisonChart(my, others) {
     const container = document.getElementById("restaurant-rank");
-    container.innerHTML = "<h3>🆚 Compared with Nearby Businesses</h3>";
+    container.innerHTML = "<h3>Compared with Nearby Businesses</h3>";
 
     const canvas = document.createElement("canvas");
     container.appendChild(canvas);
@@ -298,6 +355,7 @@ function drawComparisonSummary(my, others) {
         weaknessBox.appendChild(item);
     });
 }
+
 async function submitImage() {
     const fileInput = document.getElementById("shop-image");
     const formData = new FormData();
@@ -320,5 +378,3 @@ async function submitImage() {
         resultBox.appendChild(img);
     });
 }
-
-
