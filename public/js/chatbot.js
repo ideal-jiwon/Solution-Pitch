@@ -1,3 +1,14 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById("chat-toggle-button");
+    const chatbot = document.getElementById("chatbot-container");
+
+    if (toggleBtn && chatbot) {
+        toggleBtn.addEventListener("click", () => {
+            chatbot.classList.toggle("show");
+        });
+    }
+});
+
 async function sendMessage() {
     const userInput = document.getElementById("chat-input").value.trim();
     if (!userInput) return;
@@ -43,5 +54,6 @@ async function sendMessage() {
     }
 
     document.getElementById("chat-input").value = "";
+
 }
 

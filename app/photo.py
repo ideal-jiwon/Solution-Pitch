@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 import os
 
-photo_bp = Blueprint("photo", __name__)  # ✅ 반드시 필요
+photo_bp = Blueprint("photo", __name__) 
 
 from app.image_analysis import compare_with_pexels
 
@@ -22,7 +22,7 @@ def upload_photo():
 
         print("✅ Image saved:", filepath)
 
-        # ⬇️ 분석 시도
+        
         from app.image_analysis import compare_with_pexels
         matches, solution = compare_with_pexels(filepath)
 
@@ -30,12 +30,12 @@ def upload_photo():
         print("✅ Solution:", solution)
 
         return jsonify({
-            "message": "분석 완료!",
+            "message": "Complete!",
             "matches": matches,
             "solution": solution
         })
 
     except Exception as e:
-        print("❌ Error in upload_photo:", str(e))  # 🔥 로그에 실제 에러 출력
+        print("❌ Error in upload_photo:", str(e)) 
         return jsonify({"error": str(e)}), 500
 
