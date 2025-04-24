@@ -42,3 +42,4 @@ next-env.d.ts
 *.pyc
 __pycache__/
 app/database/data/
+.env
