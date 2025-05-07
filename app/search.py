@@ -6,14 +6,10 @@ search_bp = Blueprint("search", __name__)
 @search_bp.route("/search", methods=["POST"])
 def search():
     data = request.json
-    name = data.get("name", "").strip()
-    address = data.get("address", "").strip()
-    city = data.get("city", "").strip()
-    state = data.get("state", "").strip()
-    postal_code = data.get("postal_code", "").strip()
+    full_address = data.get("full_address","").strip()
 
-    if not all([name, address, city, state, postal_code]):
-        return jsonify({"error": "Incomplete business info"}), 400
+    if not full_address:
+        return jsonify({"error": "Missing address"}), 400
 
     conn = connect_db()
     cursor = conn.cursor()
@@ -21,14 +17,10 @@ def search():
     query = """
         SELECT business_id, name, address, city, latitude, longitude
         FROM businesses
-        WHERE LOWER(name) = LOWER(%s)
-          AND LOWER(address) = LOWER(%s)
-          AND LOWER(city) = LOWER(%s)
-          AND LOWER(state) = LOWER(%s)
-          AND postal_code = %s
+        WHERE LOWER(address || ', ' || city || ', ' || state || ' ' || postal_code) LIKE LOWER(%s)
         LIMIT 1;
     """
-    cursor.execute(query, (name, address, city, state, postal_code))
+    cursor.execute(query, (f"%{full_address}%",))
     row = cursor.fetchone()
 
     cursor.close()
@@ -45,3 +37,26 @@ def search():
         "city": city,
         "coordinates": { "latitude": lat, "longitude": lng }
     })
+
+
+@search_bp.route("/api/address-suggestions", methods=["GET"])
+def suggest_address():
+    query = request.args.get("query","").strip()
+    if not query:
+        return jsonify([])
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT DISTINCT address || ', ' || city || ', ' || state || ' ' || postal_code AS full_address
+        FROM businesses
+        WHERE LOWER(address || ', ' || city || ', ' || state || ' ' || postal_code) LIKE LOWER(%s)
+        LIMIT 10
+    """, (f"%{query}%",))
+
+    suggestions = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+    return jsonify(suggestions)
+

@@ -81,7 +81,7 @@ def compare_with_pexels(uploaded_path, query="restaurant"):
 
     best = sorted(scores, key=lambda x: -x[1])
     
-    # 안전하게 처리
+    
     if not best:
         return [], "❌ We failed to analyze photos"
 

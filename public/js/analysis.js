@@ -107,7 +107,7 @@ function drawSentimentBar(averages) {
         (averages.negative * 100).toFixed(1)
     ];
 
-    // 바 차트
+    // bar chart
     window.sentimentBarChart = new Chart(ctx, {
         type: "bar",
         data: {
@@ -409,3 +409,34 @@ async function submitImage() {
         resultBox.appendChild(img);
     });
 }
+// autocomplete
+const addressInput = document.getElementById("autocomplete-address");
+const suggestionBox = document.getElementById("address-suggestions");
+
+addressInput.addEventListener("input", async () => {
+  const query = addressInput.value.trim();
+  if (!query) {
+    suggestionBox.innerHTML = "";
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/address-suggestions?query=${encodeURIComponent(query)}`);
+    const suggestions = await res.json();
+
+    suggestionBox.innerHTML = "";
+    suggestions.forEach(address => {
+      const item = document.createElement("div");
+      item.className = "autocomplete-item";
+      item.textContent = address;
+      item.onclick = () => {
+        addressInput.value = address;
+        suggestionBox.innerHTML = "";
+      };
+      suggestionBox.appendChild(item);
+    });
+  } catch (err) {
+    console.error("❌ Failed to fetch suggestions", err);
+    suggestionBox.innerHTML = "";
+  }
+});

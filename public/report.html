@@ -24,11 +24,8 @@
                 
                     <div id="manual-search">
                         <h3>Search My Business</h3>
-                        <input type="text" id="b-name" placeholder="Business Name">
-                        <input type="text" id="b-address" placeholder="Address">
-                        <input type="text" id="b-city" placeholder="City">
-                        <input type="text" id="b-state" placeholder="State">
-                        <input type="text" id="b-postal" placeholder="Postal Code">
+                        <input type="text" id="autocomplete-address" placeholder="Type your business address" autocomplete="off">
+                        <div id="address-suggestions" class="autocomplete-dropdown"></div>
                         <button onclick="searchBusiness()">Search</button>
                     </div>
                 </div>

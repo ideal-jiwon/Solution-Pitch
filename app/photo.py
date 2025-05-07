@@ -26,8 +26,8 @@ def upload_photo():
         from app.image_analysis import compare_with_pexels
         matches, solution = compare_with_pexels(filepath)
 
-        print("✅ Matches:", matches)
-        print("✅ Solution:", solution)
+        print("Matches:", matches)
+        print("Solution:", solution)
 
         return jsonify({
             "message": "Complete!",
