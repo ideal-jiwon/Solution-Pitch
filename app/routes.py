@@ -3,7 +3,6 @@ import requests
 import os
 places_bp = Blueprint("places", __name__)
 
-
 # Google Places API Key
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
 
@@ -12,7 +11,7 @@ PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
 
 @places_bp.route("/places/search", methods=["POST"])
 def search_places():
-    """Google Places API - searchText 방식으로 장소 검색"""
+    """Google Places API - searchText"""
     data = request.json
     query = data.get("query")
 

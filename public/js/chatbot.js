@@ -16,7 +16,7 @@ async function sendMessage() {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
 
-    // ✅ Remind 입력 처리
+    // Remind
     if (userInput.toLowerCase().startsWith("remind:")) {
         const note = userInput.slice(7).trim();
         try {
@@ -38,7 +38,7 @@ async function sendMessage() {
         return;
     }
 
-    // 🤖 일반 챗봇 응답 처리 (예: /chat 호출)
+    // chat
     try {
         const response = await fetch("/chat", {
             method: "POST",

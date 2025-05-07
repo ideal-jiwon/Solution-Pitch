@@ -43,3 +43,5 @@ next-env.d.ts
 __pycache__/
 app/database/data/
 .env
+
+/temp

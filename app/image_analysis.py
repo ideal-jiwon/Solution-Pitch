@@ -13,7 +13,6 @@ def get_model():
         _model = SentenceTransformer('clip-ViT-B-32')
     return _model
 
-
 def get_image_embedding_from_url(url):
     model = get_model()
     response = requests.get(url)
@@ -82,7 +81,7 @@ def compare_with_pexels(uploaded_path, query="restaurant"):
 
     best = sorted(scores, key=lambda x: -x[1])
     
-    # 🔐 안전하게 처리
+    # 안전하게 처리
     if not best:
         return [], "❌ We failed to analyze photos"
 

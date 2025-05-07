@@ -1,124 +1,112 @@
+import os
 import pandas as pd
-import psycopg2
-from psycopg2.extras import execute_values
+import csv
+
+from dotenv import load_dotenv
+from azure.storage.blob import BlobServiceClient
 from app.services.db import connect_db
 
+load_dotenv()
 
-def insert_businesses(csv_path):
-    df = pd.read_csv(csv_path)
+AZURE_STORAGE_KEY = os.getenv("AZURE_STORAGE_KEY")
+AZURE_STORAGE_URL = "https://restaurantimagestorage.blob.core.windows.net"
+CONTAINER_NAME = "restaurantreviews"
+
+def download_blob(blob_name, local_path):
+    service = BlobServiceClient(account_url=AZURE_STORAGE_URL, credential=AZURE_STORAGE_KEY)
+    blob = service.get_blob_client(container=CONTAINER_NAME, blob=blob_name)
+    with open(local_path, "wb") as f:
+        f.write(blob.download_blob().readall())
+    print(f"Downloaded {blob_name} to {local_path}")
+
+def copy_csv_to_postgres(csv_path, table_name, columns):
     conn = connect_db()
     cursor = conn.cursor()
-
-    df["hours"] = df["hours"].apply(lambda h: None if pd.isna(h) or h == "\\N" else h)
-    df["is_open"] = df["is_open"].apply(lambda x: str(x).lower() == "true")
-
-    values = [
-        (
-            str(row["business_id"]),
-            str(row["name"]),
-            str(row["address"]),
-            str(row["city"]),
-            str(row["state"]),
-            str(row["postal_code"]),
-            float(row["latitude"]),
-            float(row["longitude"]),
-            str(row["categories"]),
-            row["hours"],
-            int(row["review_count"]),
-            float(row["stars"]),
-            bool(row["is_open"])
-        )
-        for _, row in df.iterrows()
-    ]
-
-    query = """
-        INSERT INTO businesses (
-            business_id, name, address, city, state, postal_code,
-            latitude, longitude, categories, hours,
-            review_count, stars, is_open
-        ) VALUES %s
-        ON CONFLICT (business_id) DO NOTHING;
-    """
-    execute_values(cursor, query, values, page_size=1000)
+    with open(csv_path, "r", encoding="utf-8") as f:
+        next(f)  # skip header
+        cursor.copy_expert(f"""
+            COPY {table_name} ({columns})
+            FROM STDIN WITH CSV NULL '\\N'
+        """, f)
     conn.commit()
     cursor.close()
     conn.close()
-    print("✅ businesses 삽입 완료")
+    print(f"Data copied to {table_name} from {csv_path}")
 
-def insert_reviews(csv_path):
-    conn = connect_db()
-    cursor = conn.cursor()
-
-    chunk_size = 10000
-
-    try:
-        for chunk in pd.read_csv(csv_path, chunksize=chunk_size):
-            chunk.dropna(subset=["review_id"], inplace=True)
-            chunk.drop_duplicates(subset=["review_id"], inplace=True)
-
-            # 안전한 타입 변환
-            chunk.fillna({
-                "text": "",
-                "stars": 0,
-                "useful": 0,
-                "funny": 0,
-                "cool": 0
-            }, inplace=True)
-
-            chunk["stars"] = pd.to_numeric(chunk["stars"], errors="coerce").fillna(0).astype(int)
-            chunk["useful"] = pd.to_numeric(chunk["useful"], errors="coerce").fillna(0).astype(int)
-            chunk["funny"] = pd.to_numeric(chunk["funny"], errors="coerce").fillna(0).astype(int)
-            chunk["cool"] = pd.to_numeric(chunk["cool"], errors="coerce").fillna(0).astype(int)
-            chunk["place_id"] = chunk.get("place_id", "UNKNOWN")
-
-            values = [
-                (
-                    str(row["review_id"]),
-                    str(row["business_id"]),
-                    int(row["stars"]),
-                    str(row["date"]),
-                    str(row["text"]),
-                    int(row["useful"]),
-                    int(row["funny"]),
-                    int(row["cool"]),
-                    str(row["place_id"])
-                )
-                for _, row in chunk.iterrows()
-            ]
-
-            query = """
-                INSERT INTO reviews (
-                    review_id, business_id, stars, date,
-                    text, useful, funny, cool, place_id
-                ) VALUES %s;
-            """
-
-            try:
-                # 🔍 디버깅용 출력
-                print("쿼리 확인:", query)
-                print("예시 values:", values[0])
-
-                execute_values(
-                    cursor,
-                    query,
-                    values,
-                    template="(%s, %s, %s, %s, %s, %s, %s, %s, %s)",  # 👈 핵심!!
-                    page_size=1000
-                )
-                conn.commit()
-                print(f"✅ 청크 {len(values)}건 삽입 완료")
-            except Exception as e:
-                print(f"❌ 청크 삽입 중 에러 발생: {e}")
-                conn.rollback()
-
-    finally:
+def truncate_table(table_name):
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE;")
+        conn.commit()
         cursor.close()
         conn.close()
-        print("✅ 전체 reviews 삽입 작업 종료")
+        print(f"Truncated table {table_name}")
 
 
+def clean_business_csv(path):
+     df = pd.read_csv(path)
+
+     df = df[df["business_id"].notnull()]
+     df = df[~df["business_id"].astype(str).str.contains("#NAME?", na=False)]
+
+     df.drop_duplicates(subset=["business_id"], inplace=True)
+
+     df.to_csv(path, index=False)
+     print("cleaned business.csv")
+
+def clean_review_csv(path):
+
+    df = pd.read_csv(path, dtype=str, low_memory=False)
+    
+    # remove nulls in key fields
+    df = df.dropna(subset=["review_id", "business_id", "user_id", "stars", "date", "text", "useful", "funny", "cool"])
+ 
+    df = df[~df["review_id"].astype(str).str.contains("#NAME?", na=False)]
+    df = df[~df["business_id"].astype(str).str.contains("#NAME?", na=False)]
+    df = df[pd.to_numeric(df['stars'], errors='coerce').notnull()]
+    df['stars'] = df['stars'].astype(float)
+
+    business_df = pd.read_csv("temp/business.csv", dtype=str)
+    valid_business_ids = set(business_df["business_id"])
+    df = df[df["business_id"].isin(valid_business_ids)]
+
+    for col in ["useful", "funny", "cool"]:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+        df = df[df[col].notnull()]
+        df[col] = df[col].astype(int)
+
+    df.drop_duplicates(subset=["review_id"], inplace=True)
+    df.to_csv(path, index=False, quoting=csv.QUOTE_ALL)
+    print("Cleaned review.csv")
 
 
+def insert_all():
+    os.makedirs("temp", exist_ok=True)
+
+    download_blob("business.csv", "temp/business.csv")
+    download_blob("review.csv", "temp/review.csv")
+    
+    #data cleaning
+    clean_business_csv("temp/business.csv")
+    clean_review_csv("temp/review.csv")
+
+    #avoiding duplicates
+    truncate_table("reviews")
+    truncate_table("businesses")
+
+    copy_csv_to_postgres(
+        "temp/business.csv",
+        "businesses",
+        "business_id, name, address, city, state, postal_code, latitude, longitude, categories, hours, review_count, stars, is_open"
+    )
+
+    try:
+        copy_csv_to_postgres(
+        "temp/review.csv",
+        "reviews",
+        "review_id, business_id, user_id, stars, date, text, useful, funny, cool"
+    )
+    except Exception as e:
+        print("❌ COPY failed:", e)
 if __name__ == "__main__":
-    insert_businesses("/Users/stellam/Desktop/temp/business.csv")
-    insert_reviews("/Users/stellam/Desktop/temp/review.csv")
+    insert_all()

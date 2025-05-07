@@ -40,4 +40,4 @@ def serve_index():
 def serve_static_files(path):
     return send_from_directory(PUBLIC_DIR, path)
 
-print("✅ Flask 서버가 실행되었습니다!")
+print("Flask server launched!")

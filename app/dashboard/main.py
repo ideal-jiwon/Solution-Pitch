@@ -1,14 +1,12 @@
-# app/dashboard/main.py
-
 import os
 import streamlit as st
 import pandas as pd
 import psycopg2
 
-# 🔹 Streamlit 페이지 설정
+# Streamlit page
 st.set_page_config(page_title="📊 Koala SolutionPitch DB", layout="wide")
 
-# 🔹 PostgreSQL에서 분석된 리뷰 불러오기
+# loading data from PostgreSQL 
 @st.cache_data
 def load_data():
     conn = psycopg2.connect(

@@ -4,12 +4,12 @@ import os
 
 auth_bp = Blueprint("auth", __name__)
 
-# 🔹 Google OAuth 설정
+# Google OAuth
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
-# 🔹 API 키 설정
+# API key
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
@@ -31,7 +31,7 @@ def auth_callback():
     if not code:
         return jsonify({"error": "No authorization code provided"}), 400
 
-    # Access Token 요청
+    # Access Token request
     token_url = "https://oauth2.googleapis.com/token"
     token_data = {
         "code": code,
@@ -48,16 +48,16 @@ def auth_callback():
 
     access_token = token_info["access_token"]
 
-    # 사용자 정보 요청
+    # request user info
     userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
     userinfo_response = requests.get(userinfo_url, headers=headers)
     user_info = userinfo_response.json()
 
-    # 세션 저장
+    # session saved
     session["user"] = user_info
 
-    return redirect("http://localhost:5500/home.html")  # 로그인 후 리디렉션
+    return redirect("http://localhost:5500/home.html")  # login redirection
 
 @auth_bp.route("/user", methods=["GET"])
 def get_user():
