@@ -9,3 +9,4 @@ torch
 sentence-transformers
 Pillow
 psycopg2-binary
+pandas
