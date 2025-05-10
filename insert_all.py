@@ -1,3 +1,4 @@
+import json
 import os
 import pandas as pd
 import csv
@@ -5,6 +6,7 @@ import csv
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
 from app.services.db import connect_db
+from app.services.nlp_service import analyze_sentiment, extract_key_phrases
 
 load_dotenv()
 
@@ -108,5 +110,30 @@ def insert_all():
     )
     except Exception as e:
         print("❌ COPY failed:", e)
+
+def analyze_and_update_reviews():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT review_id, text FROM reviews WHERE sentiment_label IS NULL LIMIT 1000")
+    reviews = cursor.fetchall()
+
+    for review_id, review_text in reviews:
+        sentiment, scores = analyze_sentiment(review_text)
+        key_phrases = extract_key_phrases(review_text)
+        score = scores.get("positive", 0.0)
+
+        cursor.execute("""
+                       UPDATE reviews
+                       SET sentiment_label = %s, sentiment_score = %s, key_phrases = %s
+                       WHERE review_id = %s
+        """, (sentiment, score, json.dumps(key_phrases), review_id))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("analysis done")
+
+
 if __name__ == "__main__":
     insert_all()
+    analyze_and_update_reviews()

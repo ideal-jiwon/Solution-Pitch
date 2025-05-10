@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, json, request, jsonify
 from app.services.db import connect_db
 from app.services.nlp_service import analyze_sentiment, extract_key_phrases, classify_category
 
@@ -16,23 +16,36 @@ def realtime_sentiment():
     reviews = cursor.fetchall()
 
     if not reviews:
+        cursor.close()
+        conn.close()
         return jsonify({"error": "No reviews found"}), 404
 
     analyzed_reviews = []
 
     for review_id, review_text in reviews:
+        #sentiment analysis
         sentiment, confidence_scores = analyze_sentiment(review_text)
+        label = sentiment
+        score = confidence_scores.get("positive", 0.0)
+
+        #extracting keywords from Azure
         key_phrases = extract_key_phrases(review_text)
-        category = classify_category(review_text)
+
+        #saving
+        cursor.execute("""
+                       UPDATE reviews
+                       SET sentiment_label = %s, sentiment_score = %s, key_phrases = %s
+                       WHERE review_id = %s
+                       """, (label, score, json.dumps(key_phrases), review_id))
 
         analyzed_reviews.append({
             "review_id": review_id,
             "sentiment": sentiment,
             "confidence": confidence_scores,
             "keywords": key_phrases,
-            "category": category
         })
-
+        
+    conn.commit()
     cursor.close()
     conn.close()
 
