@@ -42,12 +42,3 @@ def serve_static_files(path):
 
 print("Flask server launched!")
 
-if os.getenv("SEED_ON_STARTUP", "false").lower() == "true":
-    try:
-        from insert_all import insert_all, analyze_and_update_reviews
-        print("🌱 Starting initial data insert & analysis...")
-        insert_all()
-        analyze_and_update_reviews()
-        print("✅ Initial data insert complete.")
-    except Exception as e:
-        print(f"❌ Failed to seed data on startup: {e}")
