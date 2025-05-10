@@ -151,11 +151,19 @@ document.getElementById("autocomplete-address").addEventListener("input", async 
         const res = await fetch(`/api/address-suggestions?query=${encodeURIComponent(query)}`);
         const addresses = await res.json();
 
-
         const suggestionBox = document.getElementById("address-suggestions");
-        suggestionBox.innerHTML = addresses.map(addr => `
-            <div class="suggestion-item" onclick="selectSuggestion('${addr.replace(/'/g, "\\'")}')">${addr}</div>
-        `).join("");
+        suggestionBox.innerHTML = ""; // Clear first
+
+        addresses.forEach(addr => {
+            const div = document.createElement("div");
+            div.className = "suggestion-item";
+            div.textContent = addr;
+            div.addEventListener("click", () => {
+                selectSuggestion(addr);
+            });
+            suggestionBox.appendChild(div);
+        });
+
     } catch (err) {
         console.error("❌ Failed to fetch suggestions:", err);
     }
