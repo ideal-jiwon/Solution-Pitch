@@ -10,4 +10,6 @@ sentence-transformers
 Pillow
 psycopg2-binary
 pandas
-azure
+azure-core
+azure-ai-textanalytics
+azure-storage-blob
