@@ -11,7 +11,7 @@ def chat():
     if message.lower().startswith("remind:"):
         note = message[7:].strip()
         if not note:
-            return jsonify({"response": "✏️ 메모할 내용을 입력해주세요!"})
+            return jsonify({"response": "✏️ Please make a note here!"})
 
         script = f'''
         tell application "Reminders"
