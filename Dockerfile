@@ -13,8 +13,8 @@ USER appuser
 # Set working directory
 WORKDIR /app
 
-# Copy files to container
-COPY . .
+# Copy ONLY the correct subfolder
+COPY . /app
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
