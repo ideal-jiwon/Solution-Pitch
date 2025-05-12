@@ -45,3 +45,4 @@ app/database/data/
 .env
 
 /temp
+!server.py
