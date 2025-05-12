@@ -13,5 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Expose port
 EXPOSE 8000
 
-# Start the application
-CMD ["bash", "startup.sh"]
+# Start the app with Gunicorn directly
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-8000}"]
+
