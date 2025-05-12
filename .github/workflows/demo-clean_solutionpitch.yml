@@ -29,8 +29,8 @@ jobs:
 
       - name: Zip artifact for deployment
         run: |
-          cd restaurant-ai-frontend-typescript
-          zip -r ../release.zip . -x "venv/*" "*.git*" "__pycache__/*"
+          zip -r release.zip restaurant-ai-frontend-typescript -x "**/venv/**" "**/.git/**" "**/__pycache__/**"
+        
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
